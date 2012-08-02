@@ -11,6 +11,9 @@ class Dimension(object):
     def __len__(self):
         return len(self.values)
 
+    def __repr__(self):
+        return 'Dimension:"%s"' % self.title
+
 
 class Table(object):
 
