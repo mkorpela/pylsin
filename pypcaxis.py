@@ -1,5 +1,4 @@
 import re
-from itertools import product
 from operator import mul
 
 
@@ -26,11 +25,17 @@ class Table(object):
         return TableWithFixedDimension(self, title, value)
 
     def get(self, *criteria):
-        dim_lenghts = [len(dim) for dim in self.dimensions]
+        dim_lengths = [len(dim) for dim in self.dimensions]
         dim_indices = [dim.values.index(c) for (dim, c)
                        in zip(self.dimensions, criteria)]
-        return self.data[sum(reduce(mul, dim_lenghts[i+1:], 1) * index
+        return self.data[sum(reduce(mul, dim_lengths[i+1:], 1) * index
                          for i, index in enumerate(dim_indices))]
+
+    def as_list(self):
+        if not self.dimensions:
+            return self.get()
+        dim = self.dimensions[0]
+        return [self.get_by(dim.title, value).as_list() for value in dim.values]
 
 
 class TableWithFixedDimension(Table):
@@ -108,3 +113,7 @@ if __name__ == '__main__':
            table.get_by('Kunta', 'Tuusula - Tusby').get_by('Vuosi', '2008').get('Veronalaiset tulot, mediaani')
     table = parse('examples/vaalit.px')
     assert table.get('Uudenmaan vaalipiiri', 'VIHR', u'Yhteens\xe4', u'78 vuotta') == '-'
+    tuloja = parse('examples/tuloja.px')
+    assert tuloja.get(u'114 J\xe4rjest\xf6jen johtajat', 'Miehet', u'S\xe4\xe4nn\xf6llisen ty\xf6ajan keskiansio') == 5472
+    array = tuloja.as_list()
+    print 'insanity::', array[0][0][1]
